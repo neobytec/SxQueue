@@ -14,7 +14,6 @@ class WorkerFactory implements FactoryInterface
      */
     public function createService(ServiceLocatorInterface $serviceLocator, $canonicalName = null, $requestedName = null)
     {
-        
         $workerOptions      = $serviceLocator->get('SxQueue\Options\WorkerOptions');
         $queuePluginManager = $serviceLocator->get('SxQueue\Queue\QueuePluginManager');
 

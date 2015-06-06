@@ -64,7 +64,7 @@ abstract class AbstractQueue implements QueueInterface
         if ($job instanceof QueueAwareInterface) {
             $job->setQueue($this);
         }
-
+        
         return $job;
     }
 }

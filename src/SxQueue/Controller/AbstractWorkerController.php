@@ -6,6 +6,7 @@ use SxQueue\Controller\Exception\WorkerProcessException;
 use SxQueue\Exception\ExceptionInterface;
 use SxQueue\Worker\WorkerInterface;
 use Zend\Mvc\Controller\AbstractActionController;
+use SxQueue\Options\WorkerOptions;
 
 /**
  * AbstractController
@@ -18,14 +19,6 @@ abstract class AbstractWorkerController extends AbstractActionController
     protected $worker;
 
     /**
-     * @param WorkerInterface $worker
-     */
-    public function __construct(WorkerInterface $worker)
-    {
-        $this->worker = $worker;
-    }
-
-    /**
      * Process a queue
      *
      * @return string
@@ -35,7 +28,9 @@ abstract class AbstractWorkerController extends AbstractActionController
     {
         $options = $this->params()->fromRoute();
         $queue   = $options['queue'];
-
+        
+        $this->loadWorker($queue);
+        
         try {
             $result = $this->worker->processQueue($queue, $options);
         } catch (ExceptionInterface $e) {
@@ -51,5 +46,22 @@ abstract class AbstractWorkerController extends AbstractActionController
             $queue,
             $result
         );
+    }
+    
+    /**
+     * Load worker for a specific queue
+     * 
+     * @param string $queue
+     */
+    private function loadWorker($queue)
+    {
+        $config = $this->serviceLocator->get('Config');
+
+        $options = !empty($config['sx_queue']['worker'][$queue])
+            ? $config['sx_queue']['worker'][$queue]
+            : $config['sx_queue']['worker']['default'];
+        
+        $this->worker = $this->serviceLocator->get('SxQueueDoctrine\Worker\DoctrineWorker');
+        $this->worker->setOptions(new WorkerOptions($options));
     }
 }

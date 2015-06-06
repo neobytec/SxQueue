@@ -10,8 +10,12 @@ return array(
     ),
     'sx_queue' => array(
         'worker' => array(
-            'max_runs'   => 100,
-            'max_memory' => 100 * 1024 * 1024
+            'default' => array(
+                'count'      => 1,
+                'sleep'      => 1,  
+                'max_runs'   => 100,
+                'max_memory' => 100 * 1024 * 1024
+            )            
         ),
     ),
 );

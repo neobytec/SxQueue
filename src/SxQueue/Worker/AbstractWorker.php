@@ -42,10 +42,9 @@ abstract class AbstractWorker implements WorkerInterface, EventManagerAwareInter
      * @param QueuePluginManager $queuePluginManager
      * @param WorkerOptions      $options
      */
-    public function __construct(QueuePluginManager $queuePluginManager, WorkerOptions $options)
+    public function __construct(QueuePluginManager $queuePluginManager)
     {
         $this->queuePluginManager = $queuePluginManager;
-        $this->options            = $options;
 
         // Listen to the signals SIGTERM and SIGINT so that the worker can be killed properly. Note that
         // because pcntl_signal may not be available on Windows, we needed to check for the existence of the function
@@ -54,6 +53,11 @@ abstract class AbstractWorker implements WorkerInterface, EventManagerAwareInter
             pcntl_signal(SIGTERM, array($this, 'handleSignal'));
             pcntl_signal(SIGINT, array($this, 'handleSignal'));
         }
+    }
+    
+    public function setOptions(WorkerOptions $options)
+    {
+        $this->options = $options;
     }
 
     /**
@@ -68,11 +72,24 @@ abstract class AbstractWorker implements WorkerInterface, EventManagerAwareInter
 
         $workerEvent = new WorkerEvent($queue);
         $eventManager->trigger(WorkerEvent::EVENT_PROCESS_QUEUE_PRE, $workerEvent);
-
+        
+        $seconds = $this->options->getSeconds();
+        $maxTime = !empty($seconds) ? time() + $seconds : 0; 
+        
         while (true) {
             // Check for external stop condition
             if ($this->isStopped()) {
                 //TODO: Realizar tareas de mantenimiento
+                break;
+            }
+            
+            // Time is more restrictive
+            if (!empty($maxTime) && (time() > $maxTime)) {
+                break;
+            }
+            
+            // Iterations
+            if (($this->options->getCount() != 0) && ($count >= $this->options->getCount())) {
                 break;
             }
 
@@ -96,11 +113,16 @@ abstract class AbstractWorker implements WorkerInterface, EventManagerAwareInter
             $count++;
 
             $eventManager->trigger(WorkerEvent::EVENT_PROCESS_JOB_POST, $workerEvent);
+            
+            $sleep = $this->options->getSleep();
+            if (!empty($sleep) && is_numeric($sleep)) {
+                sleep($sleep);
+            } 
 
+            // Max jobs
             if ($this->isMaxRunsReached($count) || $this->isMaxMemoryExceeded()) {
                 break;
             }
-
         }
 
         $eventManager->trigger(WorkerEvent::EVENT_PROCESS_QUEUE_POST, $workerEvent);
@@ -161,7 +183,9 @@ abstract class AbstractWorker implements WorkerInterface, EventManagerAwareInter
      */
     public function isMaxRunsReached($count)
     {
-        return $count >= $this->options->getMaxRuns();
+        $maxRuns = $this->options->getMaxRuns();
+        
+        return !empty($maxRuns) ? ($count >= $this->options->getMaxRuns()) : false;
     }
 
     /**

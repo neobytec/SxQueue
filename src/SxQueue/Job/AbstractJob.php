@@ -13,11 +13,12 @@ use Zend\ServiceManager\ServiceLocatorInterface;
 abstract class AbstractJob extends Message implements JobInterface, ServiceLocatorAwareInterface
 {
 
-    const JOB_STATUS_COMPLETED = '1';
-    const JOB_STATUS_FAILED    = '2';
-    const JOB_STATUS_DELETE    = '3';
-    const JOB_STATUS_ERROR     = '4';
-    const JOB_STATUS_UNKNOWN   = '5';
+    const JOB_STATUS_PENDING    = 1;
+    const JOB_STATUS_RUNNING    = 2;
+    const JOB_STATUS_DELETED    = 3;
+    const JOB_STATUS_FAILED     = 4;
+    const JOB_STATUS_COMPLETED  = 5;
+    const JOB_STATUS_UNKNOWN    = 6;
 
 
     /**

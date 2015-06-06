@@ -20,6 +20,21 @@ class WorkerOptions extends AbstractOptions
     protected $maxMemory;
 
     /**
+     * @var int
+     */
+    protected $count;
+    
+    /**
+     * @var int
+     */
+    protected $sleep;
+    
+    /**
+     * @var int
+     */
+    protected $seconds;
+
+    /**
      * Set how many jobs can be processed before the worker stops
      *
      * @param  int $maxRuns
@@ -59,5 +74,38 @@ class WorkerOptions extends AbstractOptions
     public function getMaxMemory()
     {
         return $this->maxMemory;
+    }
+
+    public function getCount()
+    {
+        return $this->count;
+    }
+
+    public function setCount($count)
+    {
+        $this->count = (int) $count;
+        return $this;
+    }
+
+    public function getSleep()
+    {
+        return $this->sleep;
+    }
+
+    public function setSleep($sleep)
+    {
+        $this->sleep = (int) $sleep;
+        return $this;
+    }
+
+    public function getSeconds()
+    {
+        return $this->seconds;
+    }
+
+    public function setSeconds($seconds)
+    {
+        $this->seconds = (int) $seconds;
+        return $this;
     }
 }
