@@ -26,6 +26,8 @@ abstract class AbstractJob extends Message implements JobInterface, ServiceLocat
      */
     protected $content = null;
 
+    protected $queue;
+    
     protected $result = self::JOB_STATUS_UNKNOWN;
     protected $serviceLocator;
 
@@ -91,5 +93,24 @@ abstract class AbstractJob extends Message implements JobInterface, ServiceLocat
         );
 
         return json_encode($data);
+    }
+
+    /**
+     * Get the queue for the job.
+     */
+    public function getQueue()
+    {
+        return $this->queue;
+    }
+
+    /**
+     * Set the que for the job.
+     * 
+     * @param string $queue
+     */
+    public function setQueue($queue)
+    {
+        $this->queue = $queue;
+        return $this;
     }
 }
